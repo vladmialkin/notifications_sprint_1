@@ -21,21 +21,19 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      id: dependencies
       run: |
         echo "ERROR_STEP=Install dependencies" >> $GITHUB_ENV
         python -m pip install --upgrade pip
         if [ -f ci_cd_requirements.txt ]; then pip install -r ci_cd_requirements.txt; fi
         
     - name: Run ruff and generate HTML report
-      id: ruff
       if: always()
       run: |
         echo "ERROR_STEP=Run ruff and generate HTML report" >> $GITHUB_ENV
         mkdir -p ruff-report-${{ matrix.python-version }}
         ruff check . | ansi2html > ruff-report-${{ matrix.python-version }}/ruff-report.html
 
-    - name: Upload Flake8 HTML report
+    - name: Upload ruff HTML report
       if: always()
       uses: actions/upload-artifact@v4
       with:
@@ -51,7 +49,6 @@ jobs:
         mypy --config-file mypy.ini . > mypy-report-${{ matrix.python-version }}/mypy-txt-report.txt
 
     - name: Upload mypy txt report
-      id: mypy_report
       if: always()
       uses: actions/upload-artifact@v4
       with:
@@ -63,7 +60,6 @@ jobs:
       id: capture_error
       if: failure()
       run: |
-        echo "harry - ${{ env.ERROR_STEP }}"
         echo "ERROR_STEP=${{ env.ERROR_STEP }}" >> $GITHUB_OUTPUT
 
     outputs:
