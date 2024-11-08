@@ -11,3 +11,4 @@ services:
 networks:
   movies-network:
     name: movies-network
+    external: true
