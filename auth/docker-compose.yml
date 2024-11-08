@@ -2,6 +2,8 @@ services:
   auth:
     container_name: movies-auth
     build: src
+    ports:
+      - "8070:8001"
     env_file:
       - src/.env
     command: bash -c "
@@ -12,6 +14,7 @@ services:
     restart: always
     networks:
       - movies-network
+
   filebeat:
     image: elastic/filebeat:8.15.2
     container_name: movies-auth-filebeat
@@ -22,7 +25,7 @@ services:
     networks:
       - movies-network
     healthcheck:
-      test: ["CMD", "pidof", "filebeat"]
+      test: [ "CMD", "pidof", "filebeat" ]
       interval: 30s
       timeout: 10s
       retries: 3

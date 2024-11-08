@@ -11,4 +11,4 @@ class AuthClient(BaseClient):
         return UserRetrieveSchema.model_validate(user)
 
 
-auth_client = AuthClient(base_url=f"{jwt_settings.AUTH_API_URL}/auth/jwt")
+auth_client = AuthClient(base_url=f"{jwt_settings.AUTH_API_URL}/jwt")

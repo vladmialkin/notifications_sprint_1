@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.deps.kafka import kafka_producer
@@ -47,6 +48,18 @@ app = FastAPI(
     redoc_url=api_settings.REDOC_URL,
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
+)
+
+origins = [
+    "http://localhost:8070"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(router)
