@@ -1,4 +1,4 @@
-from src.app.settings.base import Settings
+from app.settings.base import Settings
 
 
 class PostgreSQLSettings(Settings):
