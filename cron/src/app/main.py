@@ -1,6 +1,6 @@
 import asyncio
 
-from src.app.db.postgres import connect_to_db
+from app.db.postgres import connect_to_db
 
 
 async def check_messages(conn):

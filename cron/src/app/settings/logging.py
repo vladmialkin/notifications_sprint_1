@@ -1,4 +1,4 @@
-import logging
+from logging import basicConfig, getLogger, INFO
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+basicConfig(level=INFO)
+logger = getLogger(__name__)
