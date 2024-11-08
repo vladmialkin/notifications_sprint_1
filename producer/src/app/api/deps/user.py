@@ -16,7 +16,7 @@ def decode_jwt(token: str) -> dict | None:
     try:
         decoded_token = jwt.decode(
             token,
-            settings.SECRET,
+            settings.SECRET_KEY,
             settings.AUDIENCE,
             settings.JWT_ALGORITHM,
         )
