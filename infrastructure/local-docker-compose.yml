@@ -11,6 +11,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     restart: always
+    networks:
+      - movies-network
   
   pgadmin:
     image: dpage/pgadmin4
@@ -23,6 +25,8 @@ services:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
     restart: always
+    networks:
+      - movies-network
 
   redis:
     image: redis:7.4.0
@@ -33,3 +37,10 @@ services:
         - ./redis/data:/data/
     command: redis-server --databases 2
     restart: always
+    networks:
+      - movies-network
+
+
+networks:
+  movies-network:
+    name: movies-network
