@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.models.event_types import EventTypes
+from src.app import EventTypes
 
 
 class Click(BaseModel):

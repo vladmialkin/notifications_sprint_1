@@ -1,7 +1,7 @@
 from pydantic import PostgresDsn, SecretStr, field_validator
 from pydantic_core.core_schema import FieldValidationInfo
 
-from app.settings.base import Settings
+from src.app import Settings
 
 
 class PostgreSQLSettings(Settings):

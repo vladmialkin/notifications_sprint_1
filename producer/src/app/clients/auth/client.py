@@ -1,6 +1,6 @@
-from app.clients.auth.schemas import UserRetrieveSchema
-from app.clients.base.client import BaseClient
-from app.settings.jwt import settings
+from src.app import UserRetrieveSchema
+from src.app import BaseClient
+from src.app.settings import settings
 
 
 class AuthClient(BaseClient):

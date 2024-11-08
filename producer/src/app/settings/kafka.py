@@ -1,4 +1,4 @@
-from app.settings.base import Settings
+from src.app import Settings
 
 
 class KafkaSettings(Settings):

@@ -6,12 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.api.deps import kafka
-from app.db import postgresql
-from app.api.v1.router import router
-from app.settings.api import settings as api_settings
-from app.settings.kafka import settings as kafka_settings
-from app.settings.postgresql import settings as postgresql_settings
+from src.app import kafka
+from src.app import postgresql
+from src.app import router
+from src.app.settings import settings as api_settings
+from src.app.settings import settings as kafka_settings
+from src.app.settings import settings as postgresql_settings
 
 
 def serializer(value):

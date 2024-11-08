@@ -13,13 +13,9 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, mapper_registry
-from app.models.constance import (
-    NAME_STR_LEN,
+from src.app import Base, mapper_registry
+from src.app import (
     DESCRIPTION,
-    NOTIFICATION_TYPE,
-    CHANNEL,
-    STATUS,
     ChannelEnum,
     StatusEnum,
     TypeEnum

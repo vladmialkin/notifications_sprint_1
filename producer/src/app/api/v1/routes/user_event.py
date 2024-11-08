@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps.kafka import Producer
-from app.api.deps.user import UserData
-from app.api.v1.schemas.events import (
+from src.app import Producer
+from src.app import UserData
+from src.app import (
     ChangeVideoQuality,
     Click,
     PageView,
@@ -10,8 +10,8 @@ from app.api.v1.schemas.events import (
     UsingSearchFilters,
     WatchToTheEnd,
 )
-from app.models.event_types import get_topic_by_event
-from app.models.message import KafkaPayload
+from src.app import get_topic_by_event
+from src.app import KafkaPayload
 
 router = APIRouter()
 
