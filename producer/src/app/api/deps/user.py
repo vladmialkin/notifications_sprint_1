@@ -5,9 +5,9 @@ from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from src.app import auth_client
-from src.app import UserRetrieveSchema
-from src.app.settings import settings
+from app.clients.auth.client import auth_client
+from app.clients.auth.schemas import UserRetrieveSchema
+from app.settings.api import settings as api_settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -16,9 +16,9 @@ def decode_jwt(token: str) -> dict | None:
     try:
         decoded_token = jwt.decode(
             token,
-            settings.SECRET,
-            settings.AUDIENCE,
-            settings.JWT_ALGORITHM,
+            api_settings.SECRET,
+            api_settings.AUDIENCE,
+            api_settings.JWT_ALGORITHM,
         )
     except jwt.PyJWTError:
         return None

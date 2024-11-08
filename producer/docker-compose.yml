@@ -1,55 +1,4 @@
 services:
-  postgres:
-    image: postgres:16.4
-    container_name: postgres_notific
-    restart: always
-    env_file:
-        - ./src/.env
-    networks:
-      - notification-network
-    expose:
-        - 5432
-    ports:
-      - 5432:5432
-    volumes:
-        - ./dbs/postgresql-data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD", "pg_isready -U app -d auth" ]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-
-  kafka:
-    image: bitnami/kafka:latest
-    container_name: movies-kafka
-    ports:
-      - "9094:9094"
-    volumes:
-      - kafka_data:/bitnami/kafka/data
-    env_file:
-      - ./src/.env
-    networks:
-      - notification-network
-    restart: always
-    healthcheck:
-      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9094", "--list" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  zookeeper:
-    image: zookeeper:3.8
-    container_name: notification-zookeeper
-    hostname: zookeeper
-    networks:
-      - notification-network
-    restart: always
-    healthcheck:
-      test: [ "CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   notification_producer:
     container_name: notification_producer
     build: .
@@ -57,30 +6,12 @@ services:
       - ./src/.env
     restart: always
     networks:
-      - notification-network
+      - movies-network
     command: bash -c "
       alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000"
-    depends_on:
-      - postgres
-
-
-volumes:
-  postgres_data:
-    name: postgres_data
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./dbs/postgres-data
-  kafka_data:
-    name: kafka_data
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./kafka/data
 
 networks:
-  notification-network:
-    name: notification-network
+  movies-network:
+    name: movies-network
+    external: true

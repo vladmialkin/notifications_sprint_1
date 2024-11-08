@@ -6,12 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from src.app import kafka
-from src.app import postgresql
-from src.app import router
-from src.app.settings import settings as api_settings
-from src.app.settings import settings as kafka_settings
-from src.app.settings import settings as postgresql_settings
+from app.api.deps.kafka import kafka_producer
+from app.db import postgresql
+from app.api.v1.router import router
+from app.settings.api import settings as api_settings
+from app.settings.kafka import settings as kafka_settings
+from app.settings.postgresql import settings as postgresql_settings
 
 
 def serializer(value):
@@ -20,7 +20,7 @@ def serializer(value):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    kafka.kafka_producer = AIOKafkaProducer(
+    kafka_producer = AIOKafkaProducer(
         client_id="ugc_producer",
         bootstrap_servers=f"{kafka_settings.KAFKA_HOST}:{kafka_settings.KAFKA_PORT}",
         value_serializer=serializer,
@@ -34,9 +34,9 @@ async def lifespan(_: FastAPI):
     postgresql.async_session = async_sessionmaker(
         postgresql.async_engine, expire_on_commit=False
     )
-    await kafka.kafka_producer.start()
+    await kafka_producer.start()
     yield
-    await kafka.kafka_producer.stop()
+    await kafka_producer.stop()
     await postgresql.async_engine.dispose()
 
 

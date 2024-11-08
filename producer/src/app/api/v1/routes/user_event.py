@@ -1,31 +1,25 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.app import Producer
-from src.app import UserData
-from src.app import (
-    ChangeVideoQuality,
-    Click,
-    PageView,
-    TimeOnPage,
-    UsingSearchFilters,
-    WatchToTheEnd,
-)
-from src.app import get_topic_by_event
-from src.app import KafkaPayload
+from app.api.deps.kafka import Producer
+from app.api.deps.user import UserData
+from app.models.event_types import get_topic_by_event
+from app.models.message import KafkaPayload
+from app.api.v1.schemas.events import ChangeVideoQuality, WatchToTheEnd, UsingSearchFilters, TimeOnPage, \
+    PageView, Click
 
 router = APIRouter()
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
 async def send_message(
-    msg: Click
-    | PageView
-    | TimeOnPage
-    | ChangeVideoQuality
-    | WatchToTheEnd
-    | UsingSearchFilters,
-    producer: Producer,
-    user: UserData,
+        msg: Click
+             | PageView
+             | TimeOnPage
+             | ChangeVideoQuality
+             | WatchToTheEnd
+             | UsingSearchFilters,
+        producer: Producer,
+        user: UserData,
 ) -> None:
     """Ендпоинт для обработки события исходя из типа этого события и отправки сообщения в Kafka."""
     topic = await get_topic_by_event(msg.event_type)

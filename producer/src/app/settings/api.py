@@ -1,4 +1,4 @@
-from src.app import Settings
+from app.settings.base import Settings
 
 
 class ApiSettings(Settings):
