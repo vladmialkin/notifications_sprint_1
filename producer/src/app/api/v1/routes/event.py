@@ -8,7 +8,7 @@ from app.api.deps.kafka import Producer
 from app.api.deps.user_agent import UserAgent
 from app.api.deps.session import Session
 from app.api.deps.user import UserData
-from app.api.v1.schemas.events import NotificationEvent
+from app.api.v1.schemas.events import NotificationEvent, DeferredNotifications
 from app.repository.notification_type import notific_type_repository
 from app.repository.content import content_repository
 from app.repository.template import template_repository
@@ -97,3 +97,14 @@ async def send_message(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args
         )
+
+
+@router.post("/deferred_notification", status_code=status.HTTP_200_OK)
+async def send_deferred_notification(
+    event: DeferredNotifications,
+    session: Session,
+    producer: Producer,
+    user: UserData,
+    user_agent: UserAgent
+) -> None:
+    pass

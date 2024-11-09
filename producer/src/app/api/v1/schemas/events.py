@@ -8,3 +8,7 @@ class NotificationEvent(BaseModel):
     notification_channel: list[dict]
     payload: dict
     datetime_to_send: Optional[datetime]
+
+
+class DeferredNotifications(BaseModel):
+    notification_list: list
