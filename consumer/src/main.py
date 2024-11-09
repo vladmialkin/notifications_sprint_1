@@ -1,23 +1,28 @@
 import asyncio
+from contextlib import closing
+
 from aiokafka import AIOKafkaConsumer
 from aiosmtplib import SMTP
 
-from services.consumer.kafka import KafkaConsumer
-from services.sender.smtp import EmailSender
-from contextlib import closing
-from settings.kafka import settings as kafka_settings
-from settings.smtp import settings as smtp_settings
+from services.builder.html import FromHTMLTemplateBuilder
 from services.consumer.kafka import KafkaConsumer
 from services.consumer.utils import kafka_aclosing
 from services.sender.smtp import EmailSender
+from settings.kafka import settings as kafka_settings
+from settings.smtp import settings as smtp_settings
 
 
-async def run_notification_process(kafka_conn: AIOKafkaConsumer, smpt_conn: SMTP) -> None:
+async def run_notification_process(
+    kafka_conn: AIOKafkaConsumer, smpt_conn: SMTP
+) -> None:
     consumer = KafkaConsumer(kafka_conn)
     sender = EmailSender(smpt_conn)
+    builder = FromHTMLTemplateBuilder()
 
-    async for message in consumer.consume():
-        await sender.send(...)
+    async for notification in consumer.consume():
+        tasks = [sender.send(email) for email in builder.build(notification)]
+        await asyncio.gather(*tasks)
+
 
 async def main() -> None:
     kafka_consumer_client = AIOKafkaConsumer(

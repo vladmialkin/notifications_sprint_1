@@ -1,5 +1,6 @@
-from settings.base import Settings
 from pydantic import SecretStr
+
+from settings.base import Settings
 
 
 class SMTPSettings(Settings):

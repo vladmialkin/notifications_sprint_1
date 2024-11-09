@@ -1,8 +1,8 @@
-from schemas.base import Base
 from pydantic import EmailStr
+
+from schemas.base import Base
 
 
 class Email(Base):
-    sender: EmailStr
-    recipients: list[EmailStr]
+    recipient: EmailStr
     message: str
