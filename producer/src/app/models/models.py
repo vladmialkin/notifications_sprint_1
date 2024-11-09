@@ -17,9 +17,6 @@ from app.models.base import Base, mapper_registry
 from app.models.constance import (
     EMAIL_STR_LEN,
     DESCRIPTION,
-    NOTIFICATION_TYPE,
-    CHANNEL,
-    STATUS,
     ChannelEnum,
     StatusEnum,
     TypeEnum
