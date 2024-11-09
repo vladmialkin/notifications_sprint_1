@@ -9,7 +9,7 @@ class FromHTMLTemplateBuilder:
         return [
             Email(
                 recipient=user.email,
-                message=Template(notification.template).render(user=user),
+                body=Template(notification.template).render(user=user),
             )
             for user in notification.users
         ]

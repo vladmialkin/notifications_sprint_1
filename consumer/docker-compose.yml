@@ -1,0 +1,31 @@
+services:
+  consumer:
+    container_name: email_notification_consumer
+    build: .
+    expose: 
+      - 8003
+    env_file:
+      - .env
+    networks:
+      - movies-network
+    restart: always
+
+  filebeat:
+    image: elastic/filebeat:8.15.2
+    container_name: movies-enc-filebeat
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./log:/var/log
+    restart: always
+    networks:
+      - movies-network
+    healthcheck:
+      test: ["CMD", "pidof", "filebeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  movies-network:
+    name: movies-network
+    external: true
