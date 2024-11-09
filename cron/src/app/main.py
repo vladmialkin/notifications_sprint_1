@@ -9,6 +9,7 @@ async def check_messages(conn):
         WHERE datetime_to_send 
         BETWEEN NOW() AND NOW() + INTERVAL '10 minutes';"""
     )
+
     print(result)
 
 
