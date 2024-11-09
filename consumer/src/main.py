@@ -1,5 +1,5 @@
 import asyncio
-from contextlib import closing
+from contextlib import aclosing, closing
 
 from aiokafka import AIOKafkaConsumer
 from aiosmtplib import SMTP
@@ -66,7 +66,7 @@ async def main() -> None:
     async with (
         kafka_aclosing(kafka_consumer_client),
         closing(smtp_client),
-        closing(session),
+        aclosing(session),
     ):
         await run_notification_process(kafka_consumer_client, smtp_client, session)
 

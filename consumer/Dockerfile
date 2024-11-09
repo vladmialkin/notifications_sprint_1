@@ -14,7 +14,6 @@ WORKDIR /app
 RUN pip install --upgrade pip
 COPY pyproject.toml poetry.lock .
 RUN pip install poetry
-RUN poetry config http-basic.fleet_lib __token__ ${LIB_TOKEN}
 RUN poetry install --no-directory --no-interaction --with prod
 
 COPY . .
