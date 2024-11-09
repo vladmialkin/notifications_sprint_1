@@ -107,4 +107,5 @@ async def send_deferred_notification(
     user: UserData,
     user_agent: UserAgent
 ) -> None:
-    pass
+    print(1)
+    print(event)

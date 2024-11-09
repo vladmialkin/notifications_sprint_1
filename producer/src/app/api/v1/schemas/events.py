@@ -1,4 +1,6 @@
 from datetime import datetime
+from uuid import UUID
+
 from pydantic import BaseModel
 from typing import Optional
 
@@ -11,4 +13,4 @@ class NotificationEvent(BaseModel):
 
 
 class DeferredNotifications(BaseModel):
-    notification_list: list
+    notification_list: list[UUID]
