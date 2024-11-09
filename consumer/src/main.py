@@ -35,7 +35,7 @@ async def run_notification_process(
         await asyncio.gather(*tasks)
 
         await processed_notifications_repository.create(
-            session, notification_id=notification.id
+            session, {"notification_id": notification.id}
         )
 
 
