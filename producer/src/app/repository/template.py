@@ -6,4 +6,4 @@ class NotificationTemplatesRepository(SQLAlchemyRepository[NotificationTemplates
     pass
 
 
-notific_template_repository = NotificationTemplatesRepository(NotificationTemplates)
+template_repository = NotificationTemplatesRepository(NotificationTemplates)
