@@ -61,14 +61,14 @@ async def main() -> None:
         postgresql.async_engine, expire_on_commit=False
     )
 
-    session = await postgresql.get_async_session()
+    pg_session = await postgresql.get_async_session()
 
     async with (
-        kafka_aclosing(kafka_consumer_client),
-        closing(smtp_client),
-        aclosing(session),
+        kafka_aclosing(kafka_consumer_client) as kafka_conn,
+        closing(smtp_client) as smtp_conn,
+        aclosing(pg_session) as session,
     ):
-        await run_notification_process(kafka_consumer_client, smtp_client, session)
+        await run_notification_process(kafka_conn, smtp_conn, session)
 
 
 if __name__ == "__main__":
