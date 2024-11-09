@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 
 
 class Topics(Enum):
-    INSTANT_MSG = "instant_message"
-    DEFERRED_MSG = "deferred_message"
+    INSTANT = "instant_message"
+    DEFERRED = "deferred_message"
 
 
 class UserLogin(BaseModel):
@@ -14,4 +14,16 @@ class UserLogin(BaseModel):
 
 
 class Register(BaseModel):
+    pass
+
+
+class NewEpisode(BaseModel):
+    pass
+
+
+class NewLike(BaseModel):
+    pass
+
+
+class SubscriptionDiscount(BaseModel):
     pass

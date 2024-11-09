@@ -20,13 +20,13 @@ def serializer(value):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    # kafka.kafka_producer = AIOKafkaProducer(
-    #     client_id="ugc_producer",
-    #     bootstrap_servers=f"{kafka_settings.KAFKA_HOST}:{kafka_settings.KAFKA_PORT}",
-    #     value_serializer=serializer,
-    #     key_serializer=serializer,
-    #     compression_type="gzip",
-    # )
+    kafka.kafka_producer = AIOKafkaProducer(
+        client_id="ugc_producer",
+        bootstrap_servers=f"{kafka_settings.KAFKA_HOST}:{kafka_settings.KAFKA_PORT}",
+        value_serializer=serializer,
+        key_serializer=serializer,
+        compression_type="gzip",
+    )
     postgresql.async_engine = create_async_engine(
         postgresql_settings.DSN,
         echo=postgresql_settings.LOG_QUERIES,
@@ -34,9 +34,9 @@ async def lifespan(_: FastAPI):
     postgresql.async_session = async_sessionmaker(
         postgresql.async_engine, expire_on_commit=False
     )
-    # await kafka.kafka_producer.start()
+    await kafka.kafka_producer.start()
     yield
-    # await kafka.kafka_producer.stop()
+    await kafka.kafka_producer.stop()
     await postgresql.async_engine.dispose()
 
 

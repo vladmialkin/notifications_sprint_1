@@ -4,7 +4,7 @@ import pprint
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import DBAPIError
 
-# from app.api.deps.kafka import Producer
+from app.api.deps.kafka import Producer
 from app.api.deps.user_agent import UserAgent
 from app.api.deps.session import Session
 from app.api.deps.user import UserData
@@ -16,7 +16,7 @@ from app.repository.notification_status import status_repository
 from app.repository.channel import channel_repository
 from app.repository.notification import notification_repository
 from app.repository.notification_channel import notific_channel_repository
-from app.models.event_types import UserLogin
+from app.models.event_types import UserLogin, Topics
 from app.models.constance import StatusEnum
 from app.models.message import KafkaPayload
 from app.models.models import Notifications, Contents
@@ -28,7 +28,7 @@ router = APIRouter()
 async def send_message(
     event: NotificationEvent,
     session: Session,
-    # producer: Producer,
+    producer: Producer,
     user: UserData,
     user_agent: UserAgent
 ) -> None:
@@ -84,20 +84,16 @@ async def send_message(
         }
         await notific_channel_repository.create(session, data=channel_data)
 
+    # Send to Kafka
+    topic = Topics.INSTANT.value if type_obj.is_instant else Topics.DEFERRED.value
 
-    # topic = await get_topic_by_event(msg.event_type)
-    #
-    # if topic is None:
-    #     raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-    #
-    # payload = KafkaPayload(
-    #     topic=topic, key=msg.user_id, value=msg.model_dump_json()
-    # )
-    #
-    # try:
-    #     await producer.send(**payload.model_dump())
-    # except TypeError as e:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args
-    #     )
-    print()
+    payload = KafkaPayload(
+        topic=topic, key=user.id, value=notification_obj.id
+    )
+
+    try:
+        await producer.send(**payload.model_dump())
+    except TypeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args
+        )
