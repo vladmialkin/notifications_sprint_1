@@ -17,6 +17,7 @@ class ChannelEnum(str, Enum):
 
 
 class StatusEnum(str, Enum):
+    CREATED = 'created'
     PENDING = 'pending'
     SENT = 'sent'
     FAILED = 'failed'

@@ -29,7 +29,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('channel')
     )
     op.create_table('notificationstatus',
-    sa.Column('status', sa.Enum('PENDING', 'SENT', 'FAILED', name='statusenum'), nullable=False),
+    sa.Column('status', sa.Enum('CREATED', 'PENDING', 'SENT', 'FAILED', name='statusenum'), nullable=False),
     sa.Column('id', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -87,6 +87,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('notification_id', sa.Uuid(), nullable=False),
     sa.Column('channel_id', sa.Uuid(), nullable=False),
+    sa.Column('value', sa.String(length=128), nullable=True),
     sa.ForeignKeyConstraint(['channel_id'], ['channels.id'], ),
     sa.ForeignKeyConstraint(['notification_id'], ['notifications.id'], ),
     sa.PrimaryKeyConstraint('id', 'notification_id', 'channel_id')
