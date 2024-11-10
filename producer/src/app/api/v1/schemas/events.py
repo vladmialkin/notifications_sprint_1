@@ -1,8 +1,6 @@
 from datetime import datetime
-from uuid import UUID
-
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, Any
 
 
 class NotificationEvent(BaseModel):
@@ -13,4 +11,4 @@ class NotificationEvent(BaseModel):
 
 
 class DeferredNotifications(BaseModel):
-    notification_list: list[UUID]
+    notification_payload: dict

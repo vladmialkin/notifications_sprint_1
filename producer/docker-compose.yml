@@ -1,4 +1,72 @@
 services:
+  cron:
+    container_name: cron
+    build: ../cron/src
+    env_file:
+      - ./src/.env
+    restart: always
+    depends_on:
+      - notification_producer
+      - postgres
+    networks:
+      - notification-network
+
+  postgres:
+    image: postgres:16.4
+#    container_name: postgres_notific
+    restart: always
+    env_file:
+        - ./src/.env
+    networks:
+      - notification-network
+    expose:
+        - 5432
+    ports:
+      - 5432:5432
+    volumes:
+        - ./dbs/postgresql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready -U app -d notification" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka_notification
+    ports:
+      - "9094:9094"
+    volumes:
+      - ./dbs/kafka_data:/bitnami/kafka/data
+    env_file:
+      - ./src/.env
+    networks:
+      - notification-network
+    restart: always
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_KRAFT_CLUSTER_ID=7a308b458a504fb5bf17a3197da68222
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9094", "--list" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ui:
+    image: provectuslabs/kafka-ui:v0.7.0
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=kraft
+      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka_notification:9092
+
   notification_producer:
     container_name: notification_producer
     build: .
@@ -7,11 +75,35 @@ services:
     env_file:
       - ./src/.env
     restart: always
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
     networks:
       - movies-network
     command: bash -c "
       alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+
+volumes:
+  postgres_data:
+    name: postgres_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./dbs/postgres-data
+  kafka_data:
+    name: kafka_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./kafka/data
 
 networks:
   movies-network:

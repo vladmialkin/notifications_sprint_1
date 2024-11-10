@@ -3,8 +3,11 @@ from pydantic import BaseModel, Field
 
 
 class Topics(Enum):
-    INSTANT = "instant_message"
-    DEFERRED = "deferred_message"
+    REGISTRATION = "registration"
+    USER_LOGIN = "user_login"
+    NEW_EPISODE = "new_episode"
+    NEW_LIKE = "new_like"
+    SUBSCRIPTION_DISCOUNT = "subscription_discount"
 
 
 class UserLogin(BaseModel):
@@ -13,8 +16,9 @@ class UserLogin(BaseModel):
     user_agent: str = Field(title="User agent")
 
 
-class Register(BaseModel):
-    pass
+class Registration(BaseModel):
+    user_id: str = Field(title="UUID", description="Идентификатор пользователя")
+    user_name: str = Field(title="User name", description="Имя пользователя")
 
 
 class NewEpisode(BaseModel):
@@ -27,3 +31,12 @@ class NewLike(BaseModel):
 
 class SubscriptionDiscount(BaseModel):
     pass
+
+
+class Notification(BaseModel):
+    id: str = Field(title="UUID", description="Идентификатор уведомления")
+    user_id: str = Field(title="UUID", description="Идентификатор пользователя")
+    type_id: str = Field(title="UUID", description="Идентификатор типа уведомления")
+    content_id: str = Field(title="UUID", description="Идентификатор данных уведомления")
+    template_id: str = Field(title="UUID", description="Идентификатор шаблона уведомления")
+    status_id: str = Field(title="UUID", description="Идентификатор статуса уведомления")
