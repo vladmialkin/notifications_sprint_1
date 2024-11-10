@@ -1,0 +1,4 @@
+mypy
+ruff
+ansi2html
+types-redis

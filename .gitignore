@@ -22,9 +22,9 @@ dbs/
 
 # venv
 .venv
-*.log
 
 .python-version
 
 .DS_Store
+*.log
 

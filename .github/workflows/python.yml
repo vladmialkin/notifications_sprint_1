@@ -1,0 +1,94 @@
+name: Python app
+
+on:
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        echo "ERROR_STEP=Install dependencies" >> $GITHUB_ENV
+        python -m pip install --upgrade pip
+        if [ -f ci_cd_requirements.txt ]; then pip install -r ci_cd_requirements.txt; fi
+        
+    - name: Run ruff and generate HTML report
+      if: always()
+      run: |
+        echo "ERROR_STEP=Run ruff and generate HTML report" >> $GITHUB_ENV
+        mkdir -p ruff-report-${{ matrix.python-version }}
+        ruff check . | ansi2html > ruff-report-${{ matrix.python-version }}/ruff-report.html
+
+    - name: Upload ruff HTML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ruff-html-report-${{ matrix.python-version }}
+        path: ruff-report-${{ matrix.python-version }}/ruff-report.html
+
+    - name: Run mypy and generate txt report
+      id: mypy
+      if: always()
+      run: |
+        echo "ERROR_STEP=Run mypy and generate txt report" >> $GITHUB_ENV
+        mkdir -p mypy-report-${{ matrix.python-version }}
+        mypy --config-file mypy.ini . > mypy-report-${{ matrix.python-version }}/mypy-txt-report.txt
+
+    - name: Upload mypy txt report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mypy-txt-report-${{ matrix.python-version }}
+        path: mypy-report-${{ matrix.python-version }}
+        run: echo "ERROR_STEP=Upload mypy txt report" >> $GITHUB_ENV
+
+    - name: Capture Error Step
+      id: capture_error
+      if: failure()
+      run: |
+        echo "ERROR_STEP=${{ env.ERROR_STEP }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      ERROR_STEP: ${{ steps.capture_error.outputs.ERROR_STEP }}
+
+  notify:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: build
+    steps:
+      - name: Get short commit hash
+        id: short_sha
+        run: echo "SHORT_SHA=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)" >> $GITHUB_ENV
+
+      - name: Determine build status and failed step
+        id: status
+        run: |
+          if [ "${{ needs.build.result }}" == "success" ]; then
+            echo "STATUS=successfully" >> $GITHUB_ENV
+          else
+            echo "STATUS=with error" >> $GITHUB_ENV
+          fi
+
+      - name: Notify Telegram
+        run: |
+          MESSAGE="${{ github.repository }}: Pipeline for commit ${{ env.SHORT_SHA }} finished ${{ env.STATUS }}!"
+          if [ "${{ env.STATUS }}" == "with error" ]; then
+            MESSAGE="$MESSAGE%0A${{ needs.build.outputs.ERROR_STEP }} failed"
+          fi
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="$MESSAGE"
