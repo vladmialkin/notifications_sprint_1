@@ -1,5 +1,6 @@
 import datetime
 import pprint
+import uuid
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import DBAPIError
@@ -16,10 +17,11 @@ from app.repository.notification_status import status_repository
 from app.repository.channel import channel_repository
 from app.repository.notification import notification_repository
 from app.repository.notification_channel import notific_channel_repository
-from app.models.event_types import UserLogin, Topics
+from app.models.event_types import UserLogin, Topics, Notification
 from app.models.constance import StatusEnum
 from app.models.message import KafkaPayload
 from app.models.models import Notifications, Contents
+from app.api.deps.switcher import switcher
 
 router = APIRouter()
 
@@ -37,7 +39,7 @@ async def send_message(
     print(f'\nNotificationEvent:')
     pprint.pprint(event.model_dump())
 
-    # 1, 2, 3
+    # Получаем тип уведомления, статус и шаблон
     try:
         type_obj = await notific_type_repository.get(session, name=event.event_type)
         status_obj = await status_repository.get(session, status=StatusEnum.CREATED.value)
@@ -51,29 +53,28 @@ async def send_message(
     except DBAPIError:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    # 4
+    # Исходя из типа уведомления собираем данные для контента
+    func_ = switcher.get(event.event_type)
+    payload = await func_(event, user.id, user_agent)
+
     content_data = Contents(
         type_id=type_obj.id,
-        payload=UserLogin(
-            user_id=str(user.id),
-            user_name=event.payload.get('user_name'),
-            user_agent=user_agent
-        ).model_dump()
+        payload=payload.model_dump()
     )
     content_obj = await content_repository.create(session, data=content_data.to_dict())
 
-    # 5
+    # Создаем уведомление
     notific_data = Notifications(
         type_id=type_obj.id,
         content_id=content_obj.id,
         template_id=template_obj.id,
         user_id=user.id,
         status_id=status_obj.id,
-        datetime_to_send=datetime.datetime.now()
+        datetime_to_send=datetime.datetime.now() if type_obj.is_instant else event.datetime_to_send
     )
     notification_obj = await notification_repository.create(session, data=notific_data.to_dict())
 
-    # 6, 7
+    # Получаем канал для уведомления и записываем в notificationchannel
     for channel_dict in event.notification_channel:
         channel_obj = await channel_repository.get(session, channel=channel_dict.get('channel'))
 
@@ -85,12 +86,11 @@ async def send_message(
         await notific_channel_repository.create(session, data=channel_data)
 
     # Send to Kafka
-    topic = Topics.INSTANT.value if type_obj.is_instant else Topics.DEFERRED.value
+    topic = event.event_type
 
     payload = KafkaPayload(
         topic=topic, key=user.id, value=notification_obj.id
     )
-
     try:
         await producer.send(**payload.model_dump())
     except TypeError as e:
@@ -107,4 +107,5 @@ async def send_deferred_notification(
     user: UserData,
     user_agent: UserAgent
 ) -> None:
-    pass
+    pprint.pprint(event.model_dump())
+

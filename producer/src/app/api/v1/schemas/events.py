@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Any
 
 
 class NotificationEvent(BaseModel):
@@ -11,4 +11,4 @@ class NotificationEvent(BaseModel):
 
 
 class DeferredNotifications(BaseModel):
-    notification_list: list
+    notification_payload: dict[str, dict]

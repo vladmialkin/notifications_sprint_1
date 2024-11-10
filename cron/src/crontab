@@ -1,0 +1,1 @@
+*/1 * * * * PYTHONPATH=/opt/app /usr/local/bin/python /opt/app/app/main.py >> /var/log/cron.log 2>&1
