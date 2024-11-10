@@ -15,11 +15,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, mapper_registry
 from app.models.constance import (
-    NAME_STR_LEN,
+    EMAIL_STR_LEN,
     DESCRIPTION,
-    NOTIFICATION_TYPE,
-    CHANNEL,
-    STATUS,
     ChannelEnum,
     StatusEnum,
     TypeEnum
@@ -32,6 +29,7 @@ notification_channel = Table(
     Column("id", UUID, primary_key=True, server_default=text("gen_random_uuid()")),
     Column("notification_id", ForeignKey("notifications.id"), primary_key=True),
     Column("channel_id", ForeignKey("channels.id"), primary_key=True),
+    Column("value", String(EMAIL_STR_LEN), nullable=True)
 )
 
 

@@ -31,4 +31,3 @@ class PostgreSQLSettings(Settings):
 
 
 settings = PostgreSQLSettings()
-print(settings.DSN)

@@ -1,0 +1,14 @@
+services:
+  cron:
+    container_name: cron
+    build: src
+    env_file:
+      - src/.env
+    restart: always
+    networks:
+      - movies-network
+
+networks:
+  movies-network:
+    name: movies-network
+    external: true
