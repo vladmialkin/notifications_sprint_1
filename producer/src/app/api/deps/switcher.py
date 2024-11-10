@@ -1,9 +1,9 @@
 from app.models.event_types import Topics, UserLogin, Registration
 
 
-async def collect_user_login_payload(event, user, user_agent):
+async def collect_user_login_payload(event, user: str, user_agent: str):
     return UserLogin(
-            user_id=str(user.id),
+            user_id=user,
             user_name=event.payload.get('user_name'),
             user_agent=user_agent
         )

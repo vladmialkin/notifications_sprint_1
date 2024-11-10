@@ -3,7 +3,7 @@ services:
     container_name: cron
     build: ../cron/src
     env_file:
-      - ../cron/src/.env
+      - ./src/.env
     restart: always
     depends_on:
       - notification_producer

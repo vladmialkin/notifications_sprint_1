@@ -11,4 +11,4 @@ class NotificationEvent(BaseModel):
 
 
 class DeferredNotifications(BaseModel):
-    notification_payload: dict[str, dict]
+    notification_payload: dict

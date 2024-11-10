@@ -34,11 +34,7 @@ async def send_message(
     user: UserData,
     user_agent: UserAgent
 ) -> None:
-    """Ендпоинт для создания уведомления исходя из типа уведомления."""
-
-    print(f'\nNotificationEvent:')
-    pprint.pprint(event.model_dump())
-
+    """Ендпоинт для создания мгновенного уведомления исходя из типа уведомления."""
     # Получаем тип уведомления, статус и шаблон
     try:
         type_obj = await notific_type_repository.get(session, name=event.event_type)
@@ -88,8 +84,9 @@ async def send_message(
     # Send to Kafka
     topic = event.event_type
 
+    user_id = uuid.uuid4()
     payload = KafkaPayload(
-        topic=topic, key=user.id, value=notification_obj.id
+        topic=topic, key=str(user_id), value=str(notification_obj.id)
     )
     try:
         await producer.send(**payload.model_dump())
@@ -107,5 +104,24 @@ async def send_deferred_notification(
     user: UserData,
     user_agent: UserAgent
 ) -> None:
-    pprint.pprint(event.model_dump())
+    """Ендпоинт для создания отложенного уведомления исходя из типа уведомления."""
+    type_id = event.notification_payload['type_id']
 
+    if await notific_type_repository.exists(session, id=type_id):
+        type_obj = await notific_type_repository.get(session, id=type_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    # Send to Kafka
+    topic = type_obj.name
+
+    payload = KafkaPayload(
+        topic=topic, key=event.notification_payload['user_id'], value=event.notification_payload['id']
+    )
+    try:
+        await producer.send(**payload.model_dump())
+    except TypeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.args
+        )

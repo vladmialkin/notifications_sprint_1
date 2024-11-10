@@ -20,7 +20,7 @@ async def send_notifications(notifications):
     async with aiohttp.ClientSession() as session:
         for notification in notifications:
             data = DeferredNotifications(
-                notification_list=Notification(
+                notification_payload=Notification(
                     id=str(notification['id']),
                     user_id=str(notification['user_id']),
                     type_id=str(notification['type_id']),
