@@ -11,6 +11,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     restart: always
+    networks:
+      - movies-network
   
   pgadmin:
     image: dpage/pgadmin4
@@ -23,6 +25,8 @@ services:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
     restart: always
+    networks:
+      - movies-network
 
   redis:
     image: redis:7.4.0
@@ -33,3 +37,44 @@ services:
         - ./redis/data:/data/
     command: redis-server --databases 2
     restart: always
+    networks:
+      - movies-network
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: movies-kafka
+    ports:
+      - "9094:9094"
+    volumes:
+      - ./dbs/kafka/data:/bitnami/kafka/data
+    env_file:
+      - .env
+    networks:
+      - movies-network
+    restart: always
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9094", "--list" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: notification-zookeeper
+    hostname: zookeeper
+    networks:
+      - movies-network
+    restart: always
+    healthcheck:
+      test: [ "CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  movies-network:
+    name: movies-network
+
+

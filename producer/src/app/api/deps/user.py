@@ -7,18 +7,19 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.clients.auth.client import auth_client
 from app.clients.auth.schemas import UserRetrieveSchema
-from app.settings.jwt import settings
+from app.settings.api import settings as api_settings
+from app.settings.jwt import settings as jwt_settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{jwt_settings.AUTH_API_URL}/jwt/login")
 
 
 def decode_jwt(token: str) -> dict | None:
     try:
         decoded_token = jwt.decode(
             token,
-            settings.SECRET,
-            settings.AUDIENCE,
-            settings.JWT_ALGORITHM,
+            api_settings.SECRET,
+            api_settings.AUDIENCE,
+            api_settings.JWT_ALGORITHM,
         )
     except jwt.PyJWTError:
         return None
@@ -28,7 +29,7 @@ def decode_jwt(token: str) -> dict | None:
 
 
 async def check_user(
-    token: str = Depends(oauth2_scheme),
+        token: str = Depends(oauth2_scheme),
 ) -> UserRetrieveSchema:
     try:
         return await auth_client.check(token)

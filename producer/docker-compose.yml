@@ -70,6 +70,8 @@ services:
   notification_producer:
     container_name: notification_producer
     build: .
+    ports:
+      - "8090:8000"
     env_file:
       - ./src/.env
     restart: always
@@ -78,7 +80,7 @@ services:
     expose:
       - 8000
     networks:
-      - notification-network
+      - movies-network
     command: bash -c "
       alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000"
@@ -104,5 +106,6 @@ volumes:
       device: ./kafka/data
 
 networks:
-  notification-network:
-    name: notification-network
+  movies-network:
+    name: movies-network
+    external: true
