@@ -3,8 +3,9 @@ import asyncio
 import aiohttp
 from app.db.postgres import connect_to_db
 from app.settings.producer_api import settings as producer_api_settings
-
 from app.models.events import DeferredNotifications, Notification
+
+from app.settings.logging import logger
 
 
 async def fetch_notifications(conn):
@@ -32,9 +33,9 @@ async def send_notifications(notifications):
 
             async with session.post(producer_api_settings.PRODUCER_URL, json=data.model_dump()) as response:
                 if response.status == 200:
-                    print("Уведомление успешно отправлено:", await response.json())
+                    logger.info("Уведомление успешно отправлено:", await response.json())
                 else:
-                    print("Ошибка отправки уведомления:", response.status, await response.text())
+                    logger.info("Ошибка отправки уведомления:", response.status, await response.text())
 
 
 async def main():
